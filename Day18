@@ -1,0 +1,65 @@
+var TimeLimitedCache = function() {
+    // Store key -> { value, expiryTime }
+    this.cache = new Map();
+};
+
+/** 
+ * @param {number} key
+ * @param {number} value
+ * @param {number} duration time until expiration in ms
+ * @return {boolean} if un-expired key already existed
+ */
+TimeLimitedCache.prototype.set = function(key, value, duration) {
+    const now = Date.now();
+    const expiry = now + duration;
+
+    const existed = this.cache.has(key) && this.cache.get(key).expiry > now;
+
+    // Overwrite with new value and expiry
+    this.cache.set(key, { value, expiry });
+
+    return existed;
+};
+
+/** 
+ * @param {number} key
+ * @return {number} value associated with key
+ */
+TimeLimitedCache.prototype.get = function(key) {
+    const now = Date.now();
+    if (this.cache.has(key)) {
+        const entry = this.cache.get(key);
+        if (entry.expiry > now) {
+            return entry.value;
+        } else {
+            // Expired, remove it
+            this.cache.delete(key);
+        }
+    }
+    return -1;
+};
+
+/** 
+ * @return {number} count of non-expired keys
+ */
+TimeLimitedCache.prototype.count = function() {
+    const now = Date.now();
+    let count = 0;
+    for (const [key, entry] of this.cache.entries()) {
+        if (entry.expiry > now) {
+            count++;
+        } else {
+            // Clean up expired entries
+            this.cache.delete(key);
+        }
+    }
+    return count;
+};
+
+/**
+ * Example usage:
+ * const timeLimitedCache = new TimeLimitedCache();
+ * console.log(timeLimitedCache.set(1, 42, 1000)); // false
+ * console.log(timeLimitedCache.get(1)); // 42
+ * console.log(timeLimitedCache.count()); // 1
+ */
