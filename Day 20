@@ -1,0 +1,39 @@
+/**
+ * @param {Array<Function>} functions
+ * @return {Promise<any>}
+ */
+var promiseAll = function(functions) {
+    return new Promise((resolve, reject) => {
+        const results = new Array(functions.length); // store resolved values
+        let completed = 0; // count of resolved promises
+
+        functions.forEach((fn, index) => {
+            try {
+                fn()
+                    .then(value => {
+                        results[index] = value; // keep order
+                        completed++;
+                        if (completed === functions.length) {
+                            resolve(results); // all resolved
+                        }
+                    })
+                    .catch(err => {
+                        reject(err); // reject immediately on first error
+                    });
+            } catch (err) {
+                reject(err); // handle synchronous errors
+            }
+        });
+    });
+};
+
+/**
+ * Example usage:
+ * const promise = promiseAll([
+ *   () => new Promise(res => setTimeout(() => res(42), 100)),
+ *   () => new Promise(res => setTimeout(() => res(7), 200))
+ * ]);
+ * 
+ * promise.then(console.log).catch(console.error);
+ * // Output after 200ms: [42, 7]
+ */
