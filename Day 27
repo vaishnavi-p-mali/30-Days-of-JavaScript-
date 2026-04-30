@@ -1,0 +1,23 @@
+/**
+ * @param {Array} arr
+ * @param {number} n
+ * @return {Array}
+ */
+var flat = function (arr, n) {
+    // Helper function to recursively flatten
+    const helper = (array, depth) => {
+        let result = [];
+        for (let item of array) {
+            if (Array.isArray(item) && depth < n) {
+                // Flatten deeper if current depth < n
+                result.push(...helper(item, depth + 1));
+            } else {
+                // Keep element as is
+                result.push(item);
+            }
+        }
+        return result;
+    };
+    
+    return helper(arr, 0);
+};
