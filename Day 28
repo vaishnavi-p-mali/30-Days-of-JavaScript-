@@ -1,0 +1,24 @@
+/**
+ * @param {Object|Array} obj
+ * @return {Object|Array}
+ */
+var compactObject = function(obj) {
+    if (Array.isArray(obj)) {
+        // Process array: filter out falsy values and recursively compact nested structures
+        return obj
+            .map(item => compactObject(item)) // compact each element
+            .filter(item => Boolean(item));   // remove falsy values
+    } else if (obj !== null && typeof obj === 'object') {
+        // Process object: recursively compact each property
+        const result = {};
+        for (const key in obj) {
+            const value = compactObject(obj[key]);
+            if (Boolean(value)) {
+                result[key] = value;
+            }
+        }
+        return result;
+    }
+    // Base case: return primitive values directly
+    return obj;
+};
