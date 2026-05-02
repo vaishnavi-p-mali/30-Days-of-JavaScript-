@@ -1,0 +1,51 @@
+class EventEmitter {
+    constructor() {
+        this.events = new Map();   // Map of eventName -> array of callbacks
+        this.subscriptions = [];   // Keep track of subscriptions for unsubscribe by index
+    }
+
+    /**
+     * @param {string} eventName
+     * @param {Function} callback
+     * @return {Object}
+     */
+    subscribe(eventName, callback) {
+        if (!this.events.has(eventName)) {
+            this.events.set(eventName, []);
+        }
+        this.events.get(eventName).push(callback);
+
+        const subscriptionIndex = this.subscriptions.length;
+        this.subscriptions.push({ eventName, callback });
+
+        return {
+            unsubscribe: () => {
+                const subs = this.events.get(eventName);
+                if (subs) {
+                    const idx = subs.indexOf(callback);
+                    if (idx !== -1) {
+                        subs.splice(idx, 1);
+                    }
+                }
+                return undefined;
+            }
+        };
+    }
+
+    /**
+     * @param {string} eventName
+     * @param {Array} args
+     * @return {Array}
+     */
+    emit(eventName, args = []) {
+        if (!this.events.has(eventName)) {
+            return [];
+        }
+        const callbacks = this.events.get(eventName);
+        const results = [];
+        for (const cb of callbacks) {
+            results.push(cb(...args));
+        }
+        return results;
+    }
+}
